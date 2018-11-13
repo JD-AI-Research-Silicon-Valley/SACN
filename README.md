@@ -1,6 +1,6 @@
 # SACN
 
-Paper: "[End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion](https://arxiv.org)" 
+Paper: "[End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion](https://arxiv.org/pdf/1811.04441.pdf)" 
 
 Published in the Thirty-Third AAAI Conference on Artificial Intelligence ([AAAI-19](https://aaai.org/Conferences/AAAI-19/)). 
 
