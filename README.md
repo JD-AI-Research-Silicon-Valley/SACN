@@ -37,12 +37,14 @@ CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 \
 
 ## Citation
 
+```
 @article{shang2018end,
   title={End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion},
   author={Shang, Chao and Tang, Yun and Huang, Jing and Bi, Jinbo and He, Xiaodong and Zhou, Bowen},
   journal={arXiv preprint arXiv:1811.04441},
   year={2018}
 }
+```
 
 ## Acknowledgements
 
