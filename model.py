@@ -133,7 +133,7 @@ class ConvE(torch.nn.Module):
 
         return pred
 
-
+#GCN
 class GraphConvolution(torch.nn.Module):
     """
     Simple GCN layer, similar to https://arxiv.org/abs/1609.02907
@@ -181,7 +181,7 @@ class GraphConvolution(torch.nn.Module):
                + str(self.in_features) + ' -> ' \
                + str(self.out_features) + ')'
 
-
+#SACN
 class SACN(torch.nn.Module):
     def __init__(self, num_entities, num_relations):
         super(SACN, self).__init__()
@@ -242,7 +242,7 @@ class SACN(torch.nn.Module):
 
         return pred
 
-
+#ConvTransE
 class ConvTransE(torch.nn.Module):
     def __init__(self, num_entities, num_relations):
         super(ConvTransE, self).__init__()

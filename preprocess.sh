@@ -10,3 +10,7 @@ python wrangle_KG.py WN18RR
 python wrangle_KG.py FB15k-237
 python wrangle_KG.py FB15k-237-attr
 python wrangle_KG.py kinship
+
+# Add new dataset
+#mkdir data/DATA_NAME
+#python wrangle_KG.py DATA_NAME
