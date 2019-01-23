@@ -1,6 +1,6 @@
 from __future__ import print_function
-from src.spodernet.spodernet.utils.logger import Logger, GlobalLogger
-from src.spodernet.spodernet.utils.util import save_data, load_data, get_data_path
+from spodernet.utils.logger import Logger, GlobalLogger
+from spodernet.utils.util import save_data, load_data, get_data_path
 from os.path import join
 from scipy.sparse import csr_matrix
 

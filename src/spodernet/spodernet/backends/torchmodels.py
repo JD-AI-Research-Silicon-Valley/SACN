@@ -4,8 +4,8 @@ from torch.autograd import Variable
 import torch
 import torch.nn.functional as F
 
-from src.spodernet.spodernet.frontend import AbstractModel
-from src.spodernet.spodernet.utils.global_config import Config
+from spodernet.frontend import AbstractModel
+from spodernet.utils.global_config import Config
 
 class TorchEmbedding(torch.nn.Module, AbstractModel):
     def __init__(self, embedding_size, num_embeddings):

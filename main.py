@@ -6,10 +6,13 @@ import argparse
 import sys
 import os
 import math
+
 from os.path import join
 import torch.backends.cudnn as cudnn
+
 from evaluation import ranking_and_hits
 from model import SACN, ConvTransE, ConvE, DistMult, Complex
+
 from src.spodernet.spodernet.preprocessing.pipeline import Pipeline, DatasetStreamer
 from src.spodernet.spodernet.preprocessing.processors import JsonLoaderProcessors, Tokenizer, AddToVocab, SaveLengthsToState, StreamToHDF5, SaveMaxLengthsToState, CustomTokenizer
 from src.spodernet.spodernet.preprocessing.processors import ConvertTokenToIdx, ApplyFunction, ToLower, DictKey2ListMapper, ApplyFunction, StreamToBatch
@@ -29,9 +32,10 @@ from os.path import join, exists
 import os, sys
 import pickle as pkl
 import pickle
-
 path_dir = os.getcwd()
+
 np.set_printoptions(precision=3)
+
 timer = CUDATimer()
 cudnn.benchmark = True
 
@@ -39,16 +43,14 @@ cudnn.benchmark = True
 Config.backend = Backends.TORCH
 Config.parse_argv(sys.argv)
 Config.cuda = True
-Config.save_model_dir = 'data/saved_model'
 #Config.embedding_dim = 200
-#Logger.GLOBAL_LOG_LEVEL = LogLevel.DEBUG
 
 model_name = '{2}_{0}_{1}'.format(Config.input_dropout, Config.dropout, Config.model_name)
 epochs = 1000
-load = Config.load_model 
+load = False
 if Config.dataset is None:
     Config.dataset = 'FB15k-237'
-model_path = '{0}/{1}_{2}.model'.format(Config.save_model_dir, Config.dataset, model_name)
+model_path = 'saved_models/{0}_{1}.model'.format(Config.dataset, model_name)
 
 
 ''' Preprocess knowledge graph using spodernet. '''
@@ -79,6 +81,7 @@ def preprocess(dataset_name, delete_data=False):
     p.add_post_processor(ConvertTokenToIdx(keys2keys=keys2keys),
                          keys=['e1', 'rel', 'rel_eval', 'e2', 'e2_multi1', 'e2_multi2'])
     p.add_post_processor(StreamToHDF5('full', samples_per_file=1000, keys=input_keys))
+
     p.execute(d)
     p.save_vocabs()
 
@@ -96,6 +99,7 @@ def preprocess(dataset_name, delete_data=False):
 
 
 def main():
+    #config_path = join(path_dir, 'data', Config.dataset, 'data.npy')
     if Config.process: preprocess(Config.dataset, delete_data=True)
     input_keys = ['e1', 'rel', 'rel_eval', 'e2', 'e2_multi1', 'e2_multi2']
     p = Pipeline(Config.dataset, keys=input_keys)
@@ -110,6 +114,7 @@ def main():
     train_batcher = StreamBatcher(Config.dataset, 'train', Config.batch_size, randomize=True, keys=input_keys)
     dev_rank_batcher = StreamBatcher(Config.dataset, 'dev_ranking', Config.batch_size, randomize=False, loader_threads=4, keys=input_keys)
     test_rank_batcher = StreamBatcher(Config.dataset, 'test_ranking', Config.batch_size, randomize=False, loader_threads=4, keys=input_keys)
+
     train_batcher.at_batch_prepared_observers.insert(1,TargetIdx2MultiTarget(num_entities, 'e2_multi1', 'e2_multi1_binary'))
 
 
@@ -136,7 +141,6 @@ def main():
                 else:
                     break
 
-    # Build adjacency matrix
     adjacencies = []
     for i in range(num_relations):
         print('relation:',i)
@@ -150,13 +154,19 @@ def main():
         adj = adj + adj.transpose(0, 1)
         adjacencies.append(adj)
 
+    #filename = join(path_dir, 'data', Config.dataset, 'adj.pkl')
+    #file = open(filename, 'wb+')
+    #pkl.dump(adjacencies, file)
+    #file.close()
+
     print('Finished the preprocessing')
+
+    ############
 
     X = torch.LongTensor([i for i in range(num_entities)])
 
-    # Select the model
     if Config.model_name is None:
-        model = SACN(vocab['e1'].num_token, vocab['rel'].num_token)
+        model = ConvE(vocab['e1'].num_token, vocab['rel'].num_token)
     elif Config.model_name == 'SACN':
         model = SACN(vocab['e1'].num_token, vocab['rel'].num_token)
     elif Config.model_name == 'ConvTransE':
@@ -172,7 +182,9 @@ def main():
         raise Exception("Unknown model!")
 
 
+    #train_batcher.at_batch_prepared_observers.insert(1,TargetIdx2MultiTarget(num_entities, 'e2_multi1', 'e2_multi1_binary'))
     train_batcher = StreamBatcher(Config.dataset, 'train', Config.batch_size, randomize=True, keys=input_keys)
+
     eta = ETAHook('train', print_every_x_batches=100)
     train_batcher.subscribe_to_events(eta)
     train_batcher.subscribe_to_start_of_epoch_event(eta)
@@ -186,6 +198,7 @@ def main():
         for i in range(len(adjacencies)):
             adjacencies[i] = adjacencies[i].cuda()
 
+
     if load:
         model_params = torch.load(model_path)
         print(model)
@@ -197,8 +210,8 @@ def main():
         print(np.array(total_param_size).sum())
         model.load_state_dict(model_params)
         model.eval()
-        ranking_and_hits(model, test_rank_batcher, vocab, 'test_evaluation', X, adjacencies)
-        ranking_and_hits(model, dev_rank_batcher, vocab, 'dev_evaluation', X, adjacencies)
+        ranking_and_hits(model, test_rank_batcher, vocab, 'test_evaluation')
+        ranking_and_hits(model, dev_rank_batcher, vocab, 'dev_evaluation')
     else:
         model.init()
 
@@ -206,9 +219,7 @@ def main():
     params = [value.numel() for value in model.parameters()]
     print(params)
     print(np.sum(params))
-    print(model)
 
-    # Train the model
     opt = torch.optim.Adam(model.parameters(), lr=Config.learning_rate, weight_decay=Config.L2)
     for epoch in range(epochs):
         model.train()
@@ -219,26 +230,14 @@ def main():
             e2_multi = str2var['e2_multi1_binary'].float().cuda()
             # label smoothing
             e2_multi = ((1.0-Config.label_smoothing_epsilon)*e2_multi) + (1.0/e2_multi.size(1))
-
-            if Config.model_name is None:
-                pred = model.forward(e1, rel, X, adjacencies)
-            elif Config.model_name == 'SACN':
-                pred = model.forward(e1, rel, X, adjacencies)
-            elif Config.model_name == 'ConvTransE':
-                pred = model.forward(e1, rel, X, adjacencies)
-            elif Config.model_name == 'ConvE':
-                pred = model.forward(e1, rel)
-            elif Config.model_name == 'DistMult':
-                pred = model.forward(e1, rel)
-            elif Config.model_name == 'ComplEx':
-                pred = model.forward(e1, rel)
+            pred = model.forward(e1, rel, X, adjacencies)
             loss = model.loss(pred, e2_multi)
             loss.backward()
             opt.step()
 
             train_batcher.state.loss = loss.cpu()
 
-        # save the model
+
         print('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 

@@ -17,18 +17,18 @@ import pickle
 from io import StringIO
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from src.spodernet.spodernet.preprocessing.pipeline import Pipeline, DatasetStreamer, StreamMethods
-from src.spodernet.spodernet.preprocessing.processors import Tokenizer, CustomTokenizer, SaveStateToList, AddToVocab, ToLower, ConvertTokenToIdx, SentTokenizer
-from src.spodernet.spodernet.preprocessing.processors import JsonLoaderProcessors, RemoveLineOnJsonValueCondition, DictKey2ListMapper
-from src.spodernet.spodernet.preprocessing.processors import StreamToHDF5, DeepSeqMap, StreamToBatch, TargetIdx2MultiTarget
-from src.spodernet.spodernet.preprocessing.processors import NERTokenizer, POSTokenizer, DependencyParser, TfidfFitter, TfidfTransformer
-from src.spodernet.spodernet.preprocessing.vocab import Vocab
-from src.spodernet.spodernet.preprocessing.batching import StreamBatcher, BatcherState
-from src.spodernet.spodernet.utils.util import get_data_path, load_data
-from src.spodernet.spodernet.utils.global_config import Config, Backends
-from src.spodernet.spodernet.hooks import LossHook, AccuracyHook, ETAHook
+from spodernet.preprocessing.pipeline import Pipeline, DatasetStreamer, StreamMethods
+from spodernet.preprocessing.processors import Tokenizer, CustomTokenizer, SaveStateToList, AddToVocab, ToLower, ConvertTokenToIdx, SentTokenizer
+from spodernet.preprocessing.processors import JsonLoaderProcessors, RemoveLineOnJsonValueCondition, DictKey2ListMapper
+from spodernet.preprocessing.processors import StreamToHDF5, DeepSeqMap, StreamToBatch, TargetIdx2MultiTarget
+from spodernet.preprocessing.processors import NERTokenizer, POSTokenizer, DependencyParser, TfidfFitter, TfidfTransformer
+from spodernet.preprocessing.vocab import Vocab
+from spodernet.preprocessing.batching import StreamBatcher, BatcherState
+from spodernet.utils.util import get_data_path, load_data
+from spodernet.utils.global_config import Config, Backends
+from spodernet.hooks import LossHook, AccuracyHook, ETAHook
 
-from src.spodernet.spodernet.utils.logger import Logger, LogLevel
+from spodernet.utils.logger import Logger, LogLevel
 log = Logger('test_pipeline.py.txt')
 
 Logger.GLOBAL_LOG_LEVEL = LogLevel.STATISTICAL

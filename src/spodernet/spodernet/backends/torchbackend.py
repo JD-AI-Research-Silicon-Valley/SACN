@@ -5,9 +5,9 @@ from itertools import chain
 import torch
 import numpy as np
 
-from src.spodernet.spodernet.interfaces import IAtBatchPreparedObservable
-from src.spodernet.spodernet.utils.util import Timer
-from src.spodernet.spodernet.utils.global_config import Config
+from spodernet.interfaces import IAtBatchPreparedObservable
+from spodernet.utils.util import Timer
+from spodernet.utils.global_config import Config
 
 class TorchConverter(IAtBatchPreparedObservable):
     def __init__(self, is_volatile):

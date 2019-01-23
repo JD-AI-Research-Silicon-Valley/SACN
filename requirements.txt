@@ -5,5 +5,6 @@ scikit-learn
 h5py
 future
 nltk
+-e git://github.com/TimDettmers/bashmagic.git#egg=bashmagic
 # -e git://github.com/TimDettmers/spodernet.git#egg=spodernet
-# -e git://github.com/TimDettmers/bashmagic.git#egg=bashmagic
+

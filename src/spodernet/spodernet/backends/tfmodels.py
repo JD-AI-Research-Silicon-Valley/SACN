@@ -1,8 +1,8 @@
 import tensorflow as tf
 from tensorflow import placeholder
-from src.spodernet.spodernet.backends.tfbackend import TensorFlowConfig
-from src.spodernet.spodernet.utils.global_config import Config
-from src.spodernet.spodernet.frontend import AbstractModel
+from spodernet.backends.tfbackend import TensorFlowConfig
+from spodernet.utils.global_config import Config
+from spodernet.frontend import AbstractModel
 import numpy as np
 
 def reader(inputs, lengths, output_size, contexts=(None, None), scope=None):

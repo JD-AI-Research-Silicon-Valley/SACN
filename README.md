@@ -14,7 +14,7 @@ edge relation types. The decoder Conv-TransE enables the state-of-the-art ConvE 
 
 This repo supports Linux and Python installation via Anaconda. 
 
-1. Install [PyTorch](https://github.com/pytorch/pytorch) using [official website](https://pytorch.org/) or [Anaconda](https://anaconda.org/pytorch/pytorch).
+1. Install [PyTorch](https://github.com/pytorch/pytorch) using [official website](https://pytorch.org/) or [Anaconda](https://www.continuum.io/downloads).
 
 2. Install the requirements: `pip install -r requirements.txt`
 
@@ -33,9 +33,7 @@ CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 process True
 
 Parameters need to be specified by white-space tuples for example:
 ```
-CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 \
-                                      input_drop 0.2 hidden_drop 0.3 feat_drop 0.2 \
-                                      lr 0.003 dataset FB15k-237 process True
+CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 batch_size 128 dropout_rate 0.2 channels 100 kernel_size 1 lr 0.003 process True
 ```
 
 Here a list of parameters for the available datasets:
@@ -61,6 +59,63 @@ CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237
 ```
 
 In addition, you can added your own dataset into "data" folder. Your dataset should have the splited files: train.txt, valid.txt, and test.txt. Then you need to add 'mkdir data/DATA_NAME' and 'python wrangle_KG.py DATA_NAME' into the 'preprocess.sh` file and run it.
+
+### Parameters by Reference:
+
+```
+# SACN in FB15k-237
+init_emb_size = 200
+gc1_emb_size = 100
+dropout_rate = 0.2
+channels = 100
+kernel_size = 1,3,5
+lr = 0.003
+embedding_dim = 200
+```
+
+```
+# SACN in WN18RR
+init_emb_size = 200
+gc1_emb_size = 100
+dropout_rate = 0.2
+channels = 300
+kernel_size = 1,3,5
+lr = 0.003
+embedding_dim = 200
+```
+
+```
+# SACN in FB15k-237-Attr
+init_emb_size = 200
+gc1_emb_size = 100
+dropout_rate = 0.3
+channels = 300
+kernel_size = 1,3,5
+lr = 0.003
+embedding_dim = 200
+```
+
+```
+# Conv-TransE in FB15k-237
+embedding_dim = 100
+init_emb_size = 100
+gc1_emb_size = 150
+dropout_rate = 0.4
+channels = 50
+kernel_size = 1,3,5
+lr = 0.003
+```
+
+```
+# Conv-TransE in WN18RR
+embedding_dim = 200
+init_emb_size = 200
+gc1_emb_size = 100
+dropout_rate = 0.2
+channels = 300
+kernel_size = 1,3,5
+lr = 0.003
+```
 
 ## Citation
 

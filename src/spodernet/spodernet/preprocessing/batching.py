@@ -11,13 +11,13 @@ import numpy as np
 import queue
 import pickle
 
-from src.spodernet.spodernet.utils.util import get_data_path, load_data, Timer
-from src.spodernet.spodernet.utils.global_config import Config, Backends
-from src.spodernet.spodernet.hooks import ETAHook
-from src.spodernet.spodernet.interfaces import IAtIterEndObservable, IAtEpochEndObservable, IAtEpochStartObservable, IAtBatchPreparedObservable
-from src.spodernet.spodernet.preprocessing.processors import DictConverter
+from spodernet.utils.util import get_data_path, load_data, Timer
+from spodernet.utils.global_config import Config, Backends
+from spodernet.hooks import ETAHook
+from spodernet.interfaces import IAtIterEndObservable, IAtEpochEndObservable, IAtEpochStartObservable, IAtBatchPreparedObservable
+from spodernet.preprocessing.processors import DictConverter
 
-from src.spodernet.spodernet.utils.logger import Logger
+from spodernet.utils.logger import Logger
 log = Logger('batching.py.txt')
 
 benchmark = False
@@ -238,14 +238,14 @@ class StreamBatcher(object):
         self.timer = Timer()
         self.loader_threads = loader_threads
         if Config.backend == Backends.TORCH:
-            from src.spodernet.spodernet.backends.torchbackend import TorchConverter, TorchCUDAConverter
+            from spodernet.backends.torchbackend import TorchConverter, TorchCUDAConverter
             self.subscribe_to_batch_prepared_event(DictConverter(keys))
             self.subscribe_to_batch_prepared_event(TorchConverter(is_volatile))
             if Config.cuda:
                 import torch
                 self.subscribe_to_batch_prepared_event(TorchCUDAConverter(torch.cuda.current_device()))
         elif Config.backend == Backends.TENSORFLOW:
-            from src.spodernet.spodernet.backends.tfbackend import TensorFlowConverter
+            from spodernet.backends.tfbackend import TensorFlowConverter
             self.subscribe_to_batch_prepared_event(TensorFlowConverter())
         elif Config.backend == Backends.TEST:
             pass

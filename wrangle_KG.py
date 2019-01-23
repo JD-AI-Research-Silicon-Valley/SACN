@@ -18,6 +18,8 @@ if len(sys.argv) > 1:
     dataset_name = sys.argv[1]
 else:
     dataset_name = 'FB15k-237'
+    #dataset_name = 'FB15k'
+    #dataset_name = 'yago'
     #dataset_name = 'WN18RR'
 
 print('Processing dataset {0}'.format(dataset_name))
