@@ -33,7 +33,7 @@ CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 process True
 
 Parameters need to be specified by white-space tuples for example:
 ```
-CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 batch_size 128 dropout_rate 0.2 channels 100 kernel_size 1 lr 0.003 process True
+CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 batch_size 128 dropout_rate 0.2 channels 100 kernel_size 1 lr 0.001 process True
 ```
 
 Here a list of parameters for the available datasets:

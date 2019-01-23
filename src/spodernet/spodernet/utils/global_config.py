@@ -19,7 +19,7 @@ class Config:
     gc1_emb_size = 100
 
     embedding_dim = 200
-    learning_rate = 0.003
+    learning_rate = 0.001
 
     dropout = 0.2
     batch_size = 128
