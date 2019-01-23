@@ -15,6 +15,7 @@ from torch.nn.modules.module import Module
 import torch.nn as nn
 import torch.nn.init as init
 import os, sys
+import random
 path_dir = os.getcwd()
 
 
