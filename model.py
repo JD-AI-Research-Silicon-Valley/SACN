@@ -167,7 +167,7 @@ class GraphConvolution(torch.nn.Module):
         for i in range(len(adj)):
             if i == 0:
                 output = adj[i].mul(self.weight_sum[i].tolist())
-        else:
+            else:
                 output.add_(adj[i].mul(self.weight_sum[i].tolist()))
         support = torch.mm(input, self.weight)
         output = torch.spmm(output, support)
