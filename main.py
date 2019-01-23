@@ -11,7 +11,7 @@ from os.path import join
 import torch.backends.cudnn as cudnn
 
 from evaluation import ranking_and_hits
-from model import SACN, ConvTransE, ConvE, DistMult, Complex
+from models import SACN, ConvTransE, ConvE, DistMult, Complex
 
 from src.spodernet.spodernet.preprocessing.pipeline import Pipeline, DatasetStreamer
 from src.spodernet.spodernet.preprocessing.processors import JsonLoaderProcessors, Tokenizer, AddToVocab, SaveLengthsToState, StreamToHDF5, SaveMaxLengthsToState, CustomTokenizer
