@@ -133,7 +133,7 @@ class ConvE(torch.nn.Module):
 
         return pred
 
-#GCN
+# GCN
 class GraphConvolution(torch.nn.Module):
     """
     Simple GCN layer, similar to https://arxiv.org/abs/1609.02907
@@ -145,7 +145,7 @@ class GraphConvolution(torch.nn.Module):
         self.out_features = out_features
         self.weight = Parameter(torch.FloatTensor(in_features, out_features))
         self.weight_sum = Parameter(torch.FloatTensor(num_relations))
-
+        self.num_relations = num_relations
         if bias:
             self.bias = Parameter(torch.FloatTensor(out_features))
         else:
@@ -163,14 +163,12 @@ class GraphConvolution(torch.nn.Module):
 
 
     def forward(self, input, adj):
-
-        for i in range(len(adj)):
-            if i == 0:
-                output = adj[i].mul(self.weight_sum[i].tolist())
-            else:
-                output.add_(adj[i].mul(self.weight_sum[i].tolist()))
+        random_val = random.randint(0, self.num_relations-2)
+        output = adj[random_val].mul(self.weight_sum[random_val].tolist())
+        output.add_(adj[random_val+1].mul(self.weight_sum[random_val+1].tolist()))
         support = torch.mm(input, self.weight)
         output = torch.spmm(output, support)
+
         if self.bias is not None:
             return output + self.bias
         else:
@@ -181,7 +179,59 @@ class GraphConvolution(torch.nn.Module):
                + str(self.in_features) + ' -> ' \
                + str(self.out_features) + ')'
 
-#SACN
+# ConvTransE
+class ConvTransE(torch.nn.Module):
+    def __init__(self, num_entities, num_relations):
+        super(ConvTransE, self).__init__()
+
+        self.emb_e = torch.nn.Embedding(num_entities, Config.init_emb_size, padding_idx=0)
+        self.emb_rel = torch.nn.Embedding(num_relations, Config.embedding_dim, padding_idx=0)
+        self.inp_drop = torch.nn.Dropout(Config.input_dropout)
+        self.hidden_drop = torch.nn.Dropout(Config.dropout_rate)
+        self.feature_map_drop = torch.nn.Dropout(Config.dropout_rate)
+        self.loss = torch.nn.BCELoss()
+
+        self.conv1 =  nn.Conv1d(2, Config.channels, Config.kernel_size, stride=1, padding= int(math.floor(Config.kernel_size/2))) # kernel size is odd, then padding = math.floor(kernel_size/2)
+        self.bn0 = torch.nn.BatchNorm1d(2)
+        self.bn1 = torch.nn.BatchNorm1d(Config.channels)
+        self.bn2 = torch.nn.BatchNorm1d(Config.embedding_dim)
+        self.register_parameter('b', Parameter(torch.zeros(num_entities)))
+        self.fc = torch.nn.Linear(Config.embedding_dim*Config.channels,Config.embedding_dim)
+        self.bn3 = torch.nn.BatchNorm1d(Config.gc1_emb_size)
+        self.bn4 = torch.nn.BatchNorm1d(Config.embedding_dim)
+        self.bn_init = torch.nn.BatchNorm1d(Config.init_emb_size)
+
+        print(num_entities, num_relations)
+
+    def init(self):
+        xavier_normal_(self.emb_e.weight.data)
+        xavier_normal_(self.emb_rel.weight.data)
+
+    def forward(self, e1, rel, X, A):
+
+        emb_initial = self.emb_e(X)
+        e1_embedded_all = self.bn_init(emb_initial)
+        e1_embedded = e1_embedded_all[e1]
+        rel_embedded = self.emb_rel(rel)
+        stacked_inputs = torch.cat([e1_embedded, rel_embedded], 1)
+        stacked_inputs = self.bn0(stacked_inputs)
+        x= self.inp_drop(stacked_inputs)
+        x= self.conv1(x)
+        x= self.bn1(x)
+        x= F.relu(x)
+        x = self.feature_map_drop(x)
+        x = x.view(Config.batch_size, -1)
+        x = self.fc(x)
+        x = self.hidden_drop(x)
+        x = self.bn2(x)
+        x = F.relu(x)
+        x = torch.mm(x, e1_embedded_all.transpose(1, 0))
+        pred = F.sigmoid(x)
+
+        return pred
+
+
+# SACN
 class SACN(torch.nn.Module):
     def __init__(self, num_entities, num_relations):
         super(SACN, self).__init__()
@@ -242,106 +292,5 @@ class SACN(torch.nn.Module):
 
         return pred
 
-#ConvTransE
-class ConvTransE(torch.nn.Module):
-    def __init__(self, num_entities, num_relations):
-        super(ConvTransE, self).__init__()
-
-        self.emb_e = torch.nn.Embedding(num_entities, Config.init_emb_size, padding_idx=0)
-        self.emb_rel = torch.nn.Embedding(num_relations, Config.embedding_dim, padding_idx=0)
-        self.inp_drop = torch.nn.Dropout(Config.input_dropout)
-        self.hidden_drop = torch.nn.Dropout(Config.dropout_rate)
-        self.feature_map_drop = torch.nn.Dropout(Config.dropout_rate)
-        self.loss = torch.nn.BCELoss()
-
-        self.conv1 =  nn.Conv1d(2, Config.channels, Config.kernel_size, stride=1, padding= int(math.floor(Config.kernel_size/2))) # kernel size is odd, then padding = math.floor(kernel_size/2)
-        self.bn0 = torch.nn.BatchNorm1d(2)
-        self.bn1 = torch.nn.BatchNorm1d(Config.channels)
-        self.bn2 = torch.nn.BatchNorm1d(Config.embedding_dim)
-        self.register_parameter('b', Parameter(torch.zeros(num_entities)))
-        self.fc = torch.nn.Linear(Config.embedding_dim*Config.channels,Config.embedding_dim)
-        self.bn3 = torch.nn.BatchNorm1d(Config.gc1_emb_size)
-        self.bn4 = torch.nn.BatchNorm1d(Config.embedding_dim)
-        self.bn_init = torch.nn.BatchNorm1d(Config.init_emb_size)
-
-        print(num_entities, num_relations)
-
-    def init(self):
-        xavier_normal_(self.emb_e.weight.data)
-        xavier_normal_(self.emb_rel.weight.data)
-
-    def forward(self, e1, rel, X, A):
-
-        emb_initial = self.emb_e(X)
-        e1_embedded_all = self.bn_init(emb_initial)
-        e1_embedded = e1_embedded_all[e1]
-        rel_embedded = self.emb_rel(rel)
-        stacked_inputs = torch.cat([e1_embedded, rel_embedded], 1)
-        stacked_inputs = self.bn0(stacked_inputs)
-        x= self.inp_drop(stacked_inputs)
-        x= self.conv1(x)
-        x= self.bn1(x)
-        x= F.relu(x)
-        x = self.feature_map_drop(x)
-        x = x.view(Config.batch_size, -1)
-        x = self.fc(x)
-        x = self.hidden_drop(x)
-        x = self.bn2(x)
-        x = F.relu(x)
-        x = torch.mm(x, e1_embedded_all.transpose(1, 0))
-        pred = F.sigmoid(x)
-
-        return pred
-
-
-# SACN Parameters
-#FB15k-237
-#init_emb_size = 200
-#gc1_emb_size = 100
-#dropout_rate = 0.2
-#channels = 100
-#kernel_size = 1,3,5
-#lr 0.003
-#embedding_dim = 200
-
-
-#WN18RR
-#init_emb_size = 200
-#gc1_emb_size = 100
-#dropout_rate = 0.2
-#channels = 300
-#kernel_size = 1,3,5
-#lr 0.003
-#embedding_dim = 200
-
-
-#FB15k-237-Attr
-#init_emb_size = 200
-#gc1_emb_size = 100
-#dropout_rate = 0.3
-#channels = 300
-#kernel_size = 1,3,5
-#lr 0.003
-#embedding_dim = 200
-
-
-# Conv-TransE Parameters
-# FB15k-237
-#Config.embedding_dim = 100
-#init_emb_size = 100
-#gc1_emb_size = 150
-#dropout_rate = 0.4
-#channels = 50
-#kernel_size = 1,3,5
-#lr 0.003
-
-# WN18RR
-#Config.embedding_dim = 200
-#init_emb_size = 200
-#gc1_emb_size = 100
-#dropout_rate = 0.2
-#channels = 300
-#kernel_size = 1,3,5
-#lr 0.003
 
 

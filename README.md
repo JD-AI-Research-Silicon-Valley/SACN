@@ -60,62 +60,6 @@ CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237
 
 In addition, you can added your own dataset into "data" folder. Your dataset should have the splited files: train.txt, valid.txt, and test.txt. Then you need to add 'mkdir data/DATA_NAME' and 'python wrangle_KG.py DATA_NAME' into the 'preprocess.sh` file and run it.
 
-### Parameters by Reference:
-
-```
-# SACN in FB15k-237
-init_emb_size = 200
-gc1_emb_size = 100
-dropout_rate = 0.2
-channels = 100
-kernel_size = 1,3,5
-lr = 0.003
-embedding_dim = 200
-```
-
-```
-# SACN in WN18RR
-init_emb_size = 200
-gc1_emb_size = 100
-dropout_rate = 0.2
-channels = 300
-kernel_size = 1,3,5
-lr = 0.003
-embedding_dim = 200
-```
-
-```
-# SACN in FB15k-237-Attr
-init_emb_size = 200
-gc1_emb_size = 100
-dropout_rate = 0.3
-channels = 300
-kernel_size = 1,3,5
-lr = 0.003
-embedding_dim = 200
-```
-
-```
-# Conv-TransE in FB15k-237
-embedding_dim = 100
-init_emb_size = 100
-gc1_emb_size = 150
-dropout_rate = 0.4
-channels = 50
-kernel_size = 1,3,5
-lr = 0.003
-```
-
-```
-# Conv-TransE in WN18RR
-embedding_dim = 200
-init_emb_size = 200
-gc1_emb_size = 100
-dropout_rate = 0.2
-channels = 300
-kernel_size = 1,3,5
-lr = 0.003
-```
 
 ## Citation
 
