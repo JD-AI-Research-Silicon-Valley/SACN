@@ -11,13 +11,13 @@ import numpy as np
 import queue
 import pickle
 
-from spodernet.utils.util import get_data_path, load_data, Timer
-from spodernet.utils.global_config import Config, Backends
-from spodernet.hooks import ETAHook
-from spodernet.interfaces import IAtIterEndObservable, IAtEpochEndObservable, IAtEpochStartObservable, IAtBatchPreparedObservable
-from spodernet.preprocessing.processors import DictConverter
+from src.spodernet.spodernet.utils.util import get_data_path, load_data, Timer
+from src.spodernet.spodernet.utils.global_config import Config, Backends
+from src.spodernet.spodernet.hooks import ETAHook
+from src.spodernet.spodernet.interfaces import IAtIterEndObservable, IAtEpochEndObservable, IAtEpochStartObservable, IAtBatchPreparedObservable
+from src.spodernet.spodernet.preprocessing.processors import DictConverter
 
-from spodernet.utils.logger import Logger
+from src.spodernet.spodernet.utils.logger import Logger
 log = Logger('batching.py.txt')
 
 benchmark = False
