@@ -144,24 +144,21 @@ class GraphConvolution(torch.nn.Module):
         super(GraphConvolution, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        #self.weight = Parameter(torch.FloatTensor(in_features, out_features))
-        self.weight_sum = Parameter(torch.FloatTensor(num_relations))
+        self.weight = Parameter(torch.FloatTensor(in_features, out_features))
         self.num_relations = num_relations
+        self.alpha = torch.nn.Embedding(num_relations+1, 1, padding_idx=0)
         if bias:
             self.bias = Parameter(torch.FloatTensor(out_features))
         else:
             self.register_parameter('bias', None)
         self.reset_parameters()
-        self.alpha = torch.nn.Embedding(num_relations+1, 1, padding_idx=0)
+        
 
     def reset_parameters(self):
         stdv = 1. / math.sqrt(self.weight.size(1))
         self.weight.data.uniform_(-stdv, stdv)
         if self.bias is not None:
             self.bias.data.uniform_(-stdv, stdv)
-
-        stdv = 1. / math.sqrt(self.weight_sum.size(0))
-        self.weight_sum.data.uniform_(-stdv, stdv)
 
     def forward(self, input, adj):
 
