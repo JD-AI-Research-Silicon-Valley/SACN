@@ -143,23 +143,13 @@ def main():
                 else:
                     break
 
-    print('Building the adjacency matrix......')
-    row_sym = rows + columns  + [i for i in range(num_entities)]
-    column_sym = columns + rows + [i for i in range(num_entities)]
-    data_sym = data + data + [num_relations for i in range(num_entities)]
+    rows = rows  + [i for i in range(num_entities)]
+    columns = columns + [i for i in range(num_entities)]
+    data = data + [num_relations for i in range(num_entities)]
 
-    indices = torch.LongTensor([row_sym, column_sym]).cuda()
-    v = torch.LongTensor(data_sym).cuda()
+    indices = torch.LongTensor([rows, columns]).cuda()
+    v = torch.LongTensor(data).cuda()
     adjacencies = [indices, v, num_entities]
-
-    ## '''A = A + A.transpose(0, 1)'''
-    #rows = rows  + [i for i in range(num_entities)]
-    #columns = columns + [i for i in range(num_entities)]
-    #data = data + [num_relations for i in range(num_entities)]
-
-    #indices = torch.LongTensor([rows, columns]).cuda()
-    #v = torch.LongTensor(data).cuda()
-    #adjacencies = [indices, v, num_entities]
 
 
     #filename = join(path_dir, 'data', Config.dataset, 'adj.pkl')

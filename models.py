@@ -164,6 +164,7 @@ class GraphConvolution(torch.nn.Module):
 
         alp = self.alpha(adj[1]).t()[0]
         A = torch.sparse_coo_tensor(adj[0], alp, torch.Size([adj[2],adj[2]]), requires_grad = True)
+        A = A + A.transpose(0, 1)
         support = torch.mm(input, self.weight)
         output = torch.sparse.mm(A, support)
 
