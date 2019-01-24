@@ -14,7 +14,7 @@ edge relation types. The decoder Conv-TransE enables the state-of-the-art ConvE 
 
 This repo supports Linux and Python installation via Anaconda. 
 
-1. Install [PyTorch](https://github.com/pytorch/pytorch) using [official website](https://pytorch.org/) or [Anaconda](https://www.continuum.io/downloads).
+1. Install [PyTorch 0.4.1 ](https://github.com/pytorch/pytorch) using [official website](https://pytorch.org/) or [Anaconda](https://www.continuum.io/downloads). (For example: conda install pytorch=0.4.1 cuda90 -c pytorch)
 
 2. Install the requirements: `pip install -r requirements.txt`
 

@@ -127,32 +127,30 @@ def main():
         mx = r_mat_inv.dot(mx)
         return mx
 
-    data = [[] for j in range(num_relations)]
-    rows = [[] for j in range(num_relations)]
-    columns = [[] for j in range(num_relations)]
+    data = []
+    rows = []
+    columns = []
+
     for i, str2var in enumerate(train_batcher):
         print("batch number:", i)
         for j in range(str2var['e1'].shape[0]):
             for k in range(str2var['e2_multi1'][j].shape[0]):
                 if str2var['e2_multi1'][j][k] != 0:
-                    data[str2var['rel'][j]].append(1)
-                    rows[str2var['rel'][j]].append(str2var['e1'][j].tolist()[0])
-                    columns[str2var['rel'][j]].append(str2var['e2_multi1'][j][k])
+                    a = str2var['rel'][j]
+                    data.append(str2var['rel'][j])
+                    rows.append(str2var['e1'][j].tolist()[0])
+                    columns.append(str2var['e2_multi1'][j][k])
                 else:
                     break
 
-    adjacencies = []
-    for i in range(num_relations):
-        print('relation:',i)
-        rows[i] = rows[i] + [i for i in range(num_entities)]
-        columns[i] = columns[i] + [i for i in range(num_entities)]
-        data[i] = data[i] + [1 for i in range(num_entities)]
+    rows = rows  + [i for i in range(num_entities)]
+    columns = columns + [i for i in range(num_entities)]
+    data = data + [num_relations for i in range(num_entities)]
 
-        indices = torch.LongTensor([rows[i], columns[i]])
-        v = torch.FloatTensor(data[i])
-        adj = torch.sparse.FloatTensor(indices, v, torch.Size([num_entities,num_entities]))
-        adj = adj + adj.transpose(0, 1)
-        adjacencies.append(adj)
+    indices = torch.LongTensor([rows, columns]).cuda()
+    v = torch.LongTensor(data).cuda()
+    adjacencies = [indices, v, num_entities]
+
 
     #filename = join(path_dir, 'data', Config.dataset, 'adj.pkl')
     #file = open(filename, 'wb+')
@@ -195,8 +193,6 @@ def main():
     if Config.cuda:
         model.cuda()
         X = X.cuda()
-        for i in range(len(adjacencies)):
-            adjacencies[i] = adjacencies[i].cuda()
 
 
     if load:

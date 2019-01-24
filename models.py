@@ -152,6 +152,7 @@ class GraphConvolution(torch.nn.Module):
         else:
             self.register_parameter('bias', None)
         self.reset_parameters()
+        self.alpha = torch.nn.Embedding(num_relations+1, 1, padding_idx=0)
 
     def reset_parameters(self):
         stdv = 1. / math.sqrt(self.weight.size(1))
@@ -162,13 +163,12 @@ class GraphConvolution(torch.nn.Module):
         stdv = 1. / math.sqrt(self.weight_sum.size(0))
         self.weight_sum.data.uniform_(-stdv, stdv)
 
-
     def forward(self, input, adj):
-        random_val = random.randint(0, self.num_relations-2)
-        output = adj[random_val].mul(self.weight_sum[random_val].tolist())
-        output.add_(adj[random_val+1].mul(self.weight_sum[random_val+1].tolist()))
+
+        #Pytorch 0.4.1 (conda install pytorch=0.4.1 cuda90 -c pytorch)
+        adj = torch.sparse.FloatTensor(adj[0], self.alpha(adj[1]).t()[0], torch.Size([adj[2],adj[2]]))
         support = torch.mm(input, self.weight)
-        output = torch.spmm(output, support)
+        output = torch.spmm(adj, support)
 
         if self.bias is not None:
             return output + self.bias
