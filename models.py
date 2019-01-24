@@ -144,7 +144,7 @@ class GraphConvolution(torch.nn.Module):
         super(GraphConvolution, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        self.weight = Parameter(torch.FloatTensor(in_features, out_features))
+        #self.weight = Parameter(torch.FloatTensor(in_features, out_features))
         self.weight_sum = Parameter(torch.FloatTensor(num_relations))
         self.num_relations = num_relations
         if bias:
@@ -165,10 +165,11 @@ class GraphConvolution(torch.nn.Module):
 
     def forward(self, input, adj):
 
-        #Pytorch 0.4.1 (conda install pytorch=0.4.1 cuda90 -c pytorch)
-        adj = torch.sparse.FloatTensor(adj[0], self.alpha(adj[1]).t()[0], torch.Size([adj[2],adj[2]]))
+        alp = self.alpha(adj[1]).t()[0]
+        A = torch.sparse_coo_tensor(adj[0], alp, torch.Size([adj[2],adj[2]]), requires_grad = True)
+        A = A + A.transpose(0, 1)
         support = torch.mm(input, self.weight)
-        output = torch.spmm(adj, support)
+        output = torch.sparse.mm(A, support)
 
         if self.bias is not None:
             return output + self.bias
