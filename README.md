@@ -31,7 +31,7 @@ To run a model, you first need to preprocess the data. This can be done by speci
 CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 process True
 ```
 
-We are still organizing the code and will update the new version soon. If you have any question about this code or any advices, please email to "shangchaocs@gmail.com". Thanks!
+We are still organizing the code and will update the new version soon. If you have any question about this code or any advices, please email to "shangchaocs AT gmail.com". Thanks!
 
 
 ## Citation
