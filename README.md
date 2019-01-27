@@ -31,34 +31,7 @@ To run a model, you first need to preprocess the data. This can be done by speci
 CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 process True
 ```
 
-Parameters need to be specified by white-space tuples for example:
-```
-CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 batch_size 128 dropout_rate 0.2 channels 100 kernel_size 1 lr 0.001 process True
-```
-
-Here a list of parameters for the available datasets:
-```
-FB15k-237
-WN18RR
-FB15k-237-attr
-kinship
-```
-
-The following models/methods are provided in the code:
-```
-SACN
-ConvTransE
-ConvE
-DistMult
-ComplEx
-```
-
-After the dataset is preprocessed it will be saved to disk and the parameter "process True" can be omitted or changed to 'process False'.
-```
-CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237
-```
-
-In addition, you can added your own dataset into "data" folder. Your dataset should have the splited files: train.txt, valid.txt, and test.txt. Then you need to add 'mkdir data/DATA_NAME' and 'python wrangle_KG.py DATA_NAME' into the 'preprocess.sh` file and run it.
+We are still organizing the code and will update the new version soon. If you have any question about this code or any advices, please email to "shangchaocs@gmail.com". Thanks!
 
 
 ## Citation

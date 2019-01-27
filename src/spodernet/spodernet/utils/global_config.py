@@ -11,21 +11,13 @@ class Backends:
 
 
 class Config:
-    
-    dropout_rate = 0.2
-    channels = 100
-    kernel_size = 1
-    init_emb_size = 200
-    gc1_emb_size = 100
-
-    embedding_dim = 200
-    learning_rate = 0.001
-
     dropout = 0.2
     batch_size = 128
+    learning_rate = 0.001
     backend = Backends.TORCH
     L2 = 0.000
     cuda = False
+    embedding_dim = 200
     init_embedding_dim = 100
     gc1_emb_size=200
     gc2_emb_size=100
@@ -67,7 +59,7 @@ class Config:
 
         for i in range(len(names)):
             name = names[i]
-            if name[:2] == '--': continueparams2field
+            if name[:2] == '--': continue
             if name not in params2type:
                 log.info('List of possible parameters: {0}', params2type.keys())
                 log.error('Parameter {0} does not exist. Prefix your custom parameters with -- to skip parsing for global config', name)
@@ -81,11 +73,6 @@ class Config:
     use_transposed_convolutions = False
 
 params2type = {}
-params2type['dropout_rate'] = lambda x: float(x)
-params2type['channels'] = lambda x: int(x)
-params2type['kernel_size'] = lambda x: int(x)
-params2type['init_emb_size'] = lambda x: int(x)
-params2type['gc1_emb_size'] = lambda x: int(x)
 params2type['learning_rate'] = lambda x: float(x)
 params2type['learning_rate_decay'] = lambda x: float(x)
 params2type['dropout'] = lambda x: float(x)
@@ -127,11 +114,6 @@ alias2params['model'] = 'model_name'
 
 
 params2field = {}
-params2field['dropout_rate'] = lambda x: setattr(Config, 'dropout_rate', x)
-params2field['channels'] = lambda x: setattr(Config, 'channels', x)
-params2field['kernel_size'] = lambda x: setattr(Config, 'kernel_size', x)
-params2field['init_emb_size'] = lambda x: setattr(Config, 'init_emb_size', x)
-params2field['gc1_emb_size'] = lambda x: setattr(Config, 'gc1_emb_size', x)
 params2field['learning_rate'] = lambda x: setattr(Config, 'learning_rate', x)
 params2field['learning_rate_decay'] = lambda x: setattr(Config, 'learning_rate_decay', x)
 params2field['dropout'] = lambda x: setattr(Config, 'dropout', x)
