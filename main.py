@@ -11,7 +11,7 @@ from os.path import join
 import torch.backends.cudnn as cudnn
 
 from evaluation import ranking_and_hits
-from model import SACN, DistMult, Complex
+from models import SACN, ConvTransE, ConvE, DistMult, Complex
 
 from src.spodernet.spodernet.preprocessing.pipeline import Pipeline, DatasetStreamer
 from src.spodernet.spodernet.preprocessing.processors import JsonLoaderProcessors, Tokenizer, AddToVocab, SaveLengthsToState, StreamToHDF5, SaveMaxLengthsToState, CustomTokenizer
@@ -42,13 +42,9 @@ cudnn.benchmark = True
 # parse console parameters and set global variables
 Config.backend = Backends.TORCH
 Config.parse_argv(sys.argv)
-
 Config.cuda = True
-Config.embedding_dim = 200
-#Logger.GLOBAL_LOG_LEVEL = LogLevel.DEBUG
+#Config.embedding_dim = 200
 
-
-#model_name = 'DistMult_{0}_{1}'.format(Config.input_dropout, Config.dropout)
 model_name = '{2}_{0}_{1}'.format(Config.input_dropout, Config.dropout, Config.model_name)
 epochs = 1000
 load = False
@@ -82,7 +78,6 @@ def preprocess(dataset_name, delete_data=False):
     p.add_sent_processor(ToLower())
     p.add_sent_processor(CustomTokenizer(lambda x: x.split(' ')),keys=['e2_multi1', 'e2_multi2'])
     p.add_token_processor(AddToVocab())
-
     p.add_post_processor(ConvertTokenToIdx(keys2keys=keys2keys),
                          keys=['e1', 'rel', 'rel_eval', 'e2', 'e2_multi1', 'e2_multi2'])
     p.add_post_processor(StreamToHDF5('full', samples_per_file=1000, keys=input_keys))
@@ -103,7 +98,6 @@ def preprocess(dataset_name, delete_data=False):
         p.execute(d)
 
 
-
 def main():
     #config_path = join(path_dir, 'data', Config.dataset, 'data.npy')
     if Config.process: preprocess(Config.dataset, delete_data=True)
@@ -113,7 +107,6 @@ def main():
     vocab = p.state['vocab']
     node_list = p.state['vocab']['e1']
     rel_list = p.state['vocab']['rel']
-    #row_list = p.state['vocab']['e2_multi1']
 
     num_entities = vocab['e1'].num_token
     num_relations = vocab['rel'].num_token
@@ -134,38 +127,30 @@ def main():
         mx = r_mat_inv.dot(mx)
         return mx
 
-    data = [[] for j in range(num_relations)]
-    rows = [[] for j in range(num_relations)]
-    columns = [[] for j in range(num_relations)]
+    data = []
+    rows = []
+    columns = []
+
     for i, str2var in enumerate(train_batcher):
         print("batch number:", i)
-        # e1 = str2var['e1']
-        # rel = str2var['rel']
-        # e2_multi = str2var['e2_multi1']
         for j in range(str2var['e1'].shape[0]):
             for k in range(str2var['e2_multi1'][j].shape[0]):
                 if str2var['e2_multi1'][j][k] != 0:
-                    # print(str2var['rel'][j])
-                    # print(str2var['e1'][j])
-                    # print(str2var['e2_multi1'][j][k])
-                    data[str2var['rel'][j]].append(1)
-                    rows[str2var['rel'][j]].append(str2var['e1'][j].tolist()[0])
-                    columns[str2var['rel'][j]].append(str2var['e2_multi1'][j][k])
+                    a = str2var['rel'][j]
+                    data.append(str2var['rel'][j])
+                    rows.append(str2var['e1'][j].tolist()[0])
+                    columns.append(str2var['e2_multi1'][j][k])
                 else:
                     break
 
-    adjacencies = []
-    for i in range(num_relations):
-        print('relation:',i)
-        rows[i] = rows[i] + [i for i in range(num_entities)]
-        columns[i] = columns[i] + [i for i in range(num_entities)]
-        data[i] = data[i] + [1 for i in range(num_entities)]
+    rows = rows  + [i for i in range(num_entities)]
+    columns = columns + [i for i in range(num_entities)]
+    data = data + [num_relations for i in range(num_entities)]
 
-        indices = torch.LongTensor([rows[i], columns[i]])
-        v = torch.FloatTensor(data[i])
-        adj = torch.sparse.FloatTensor(indices, v, torch.Size([num_entities,num_entities]))
-        adj = adj + adj.transpose(0, 1)
-        adjacencies.append(adj)
+    indices = torch.LongTensor([rows, columns]).cuda()
+    v = torch.LongTensor(data).cuda()
+    adjacencies = [indices, v, num_entities]
+
 
     #filename = join(path_dir, 'data', Config.dataset, 'adj.pkl')
     #file = open(filename, 'wb+')
@@ -175,31 +160,17 @@ def main():
     print('Finished the preprocessing')
 
     ############
-    # In case features are available, define them here and set featureless=False.
-    # X = sp.csr_matrix(A[0].shape)
-    #X = sp.identity(num_entities)
-    #X = torch.tensor([i for i in range(num_entities)]).view(num_entities, 1)
-    '''
-    # Normalize adjacency matrices individually
-    for i in range(len(adjacencies)):
-        d = np.array(adjacencies[i].sum(1)).flatten()
-        d_inv = 1. / d
-        d_inv[np.isinf(d_inv)] = 0.
-        D_inv = sp.diags(d_inv)
-        adjacencies[i] = D_inv.dot(adjacencies[i]).tocsr()
-    '''
-
-    #X = torch.LongTensor(np.array(sp.identity(num_entities)))
-    #X = torch.LongTensor(np.identity(num_entities))
-    #X = torch.eye(num_entities)
-    #X = torch.ones(num_entities)
 
     X = torch.LongTensor([i for i in range(num_entities)])
 
     if Config.model_name is None:
-        model = SACN(vocab['e1'].num_token, vocab['rel'].num_token)
+        model = ConvE(vocab['e1'].num_token, vocab['rel'].num_token)
     elif Config.model_name == 'SACN':
         model = SACN(vocab['e1'].num_token, vocab['rel'].num_token)
+    elif Config.model_name == 'ConvTransE':
+        model = ConvTransE(vocab['e1'].num_token, vocab['rel'].num_token)
+    elif Config.model_name == 'ConvE':
+        model = ConvE(vocab['e1'].num_token, vocab['rel'].num_token)
     elif Config.model_name == 'DistMult':
         model = DistMult(vocab['e1'].num_token, vocab['rel'].num_token)
     elif Config.model_name == 'ComplEx':
@@ -218,31 +189,11 @@ def main():
     train_batcher.subscribe_to_events(LossHook('train', print_every_x_batches=100))
     train_batcher.at_batch_prepared_observers.insert(1,TargetIdx2MultiTarget(num_entities, 'e2_multi1', 'e2_multi1_binary'))
 
-    '''
-    if Config.cuda:
-        model.cuda()
-        X = torch.autograd.Variable(X.cuda(), volatile=True)
-        for i in range(len(adjacencies)):
-            adjacencies[i] = torch.autograd.Variable(adjacencies[i].cuda(), volatile=True)
-        #adjacencies = torch.FloatTensor(adjacencies)
-        #adjacencies = torch.autograd.Variable(adjacencies.cuda(), volatile=True)
-        #label_var = torch.autograd.Variable(i[1].cuda(), volatile=True)
-    else:
-        model.cuda()
-        X = torch.autograd.Variable(X, volatile=True)
-        for i in range(len(adjacencies)):
-             adjacencies[i] = torch.autograd.Variable(adjacencies[i], volatile=True)
-        #adjacencies = torch.FloatTensor(adjacencies)
-        #adjacencies = torch.autograd.Variable(adjacencies.cuda(), volatile=True)
-    '''
 
     if Config.cuda:
         model.cuda()
         X = X.cuda()
-        for i in range(len(adjacencies)):
-            adjacencies[i] = adjacencies[i].cuda()
-        #adjacencies = torch.Tensor(adjacencies)
-        #adjacencies = torch.stack(adjacencies).toTensor
+
 
     if load:
         model_params = torch.load(model_path)
@@ -272,12 +223,9 @@ def main():
             opt.zero_grad()
             e1 = str2var['e1'].cuda()
             rel = str2var['rel'].cuda()
-            #temp=str2var['e2_multi1_binary']
-            #print(type(str2var['e2_multi1_binary']))
             e2_multi = str2var['e2_multi1_binary'].float().cuda()
             # label smoothing
             e2_multi = ((1.0-Config.label_smoothing_epsilon)*e2_multi) + (1.0/e2_multi.size(1))
-
             pred = model.forward(e1, rel, X, adjacencies)
             loss = model.loss(pred, e2_multi)
             loss.backward()
@@ -299,4 +247,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-#CUDA_VISIBLE_DEVICES=0 python main.py model ConvE dataset FB15k-237 batch_size 512 input_drop 0.2 hidden_drop 0.3 feat_drop 0.2 lr 0.003 process True
