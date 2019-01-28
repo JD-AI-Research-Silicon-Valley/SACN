@@ -31,19 +31,9 @@ To run a model, you first need to preprocess the data. This can be done by speci
 CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 process True
 ```
 
-We are still organizing the code and will update the new version soon. If you have any question about this code or any advices, please email to "shangchaocs AT gmail.com". Thanks!
+You can modify the hyper-parameters from "src.spodernet.spodernet.utils.global_config.py".
 
-
-## Citation
-
-```
-@article{shang2018end,
-  title={End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion},
-  author={Shang, Chao and Tang, Yun and Huang, Jing and Bi, Jinbo and He, Xiaodong and Zhou, Bowen},
-  journal={arXiv preprint arXiv:1811.04441},
-  year={2018}
-}
-```
+For this test version, if you find any problems, please feel free and contact "shangchaocs AT gmail.com". We will update the code soon.
 
 ## Acknowledgements
 
