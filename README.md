@@ -33,7 +33,7 @@ CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 process True
 
 You can modify the hyper-parameters from "src.spodernet.spodernet.utils.global_config.py".
 
-For this test version, if you find any problems, please feel free and contact "shangchaocs AT gmail.com". We will update the code soon.
+For this test version, if you find any problems, please feel free and email me. We will keep updating the code.
 
 ## Acknowledgements
 
