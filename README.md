@@ -26,12 +26,10 @@ Run the preprocessing script for FB15k-237, WN18RR, FB15k-237-attr and kinship: 
 
 ## Run a model
 
-To run a model, you first need to preprocess the data. This can be done by specifying the `process` parameter. For ConvTransE and SACN models, you can run:
+To run a model, you first need to preprocess the data. This can be done by specifying the `process` parameter.  For ConvTransE and SACN models, you can run them using:
 ```
 CUDA_VISIBLE_DEVICES=0 python main.py model ConvTransE init_emb_size 100 dropout_rate 0.4 channels 50 lr 0.001 dataset FB15k-237 process True
-
 ```
-
 ```
 CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 process True
 ```
