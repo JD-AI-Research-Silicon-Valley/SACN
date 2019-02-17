@@ -26,14 +26,17 @@ Run the preprocessing script for FB15k-237, WN18RR, FB15k-237-attr and kinship: 
 
 ## Run a model
 
-To run a model, you first need to preprocess the data. This can be done by specifying the `process` parameter:
+To run a model, you first need to preprocess the data. This can be done by specifying the `process` parameter. For ConvTransE and SACN models, you can run:
+```
+CUDA_VISIBLE_DEVICES=0 python main.py model ConvTransE init_emb_size 100 dropout_rate 0.4 channels 50 lr 0.001 dataset FB15k-237 process True
+
+```
+
 ```
 CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 process True
 ```
 
-You can modify the hyper-parameters from "src.spodernet.spodernet.utils.global_config.py".
-
-For this test version, if you find any problems, please feel free and email me. We will keep updating the code.
+You can modify the hyper-parameters from "src.spodernet.spodernet.utils.global_config.py" or specify the hyper-parameter in the command. For different datasets, you need to tune the hyper-parameters. For this test version, if you find any problems, please feel free and email me. We will keep updating the code.
 
 ## Acknowledgements
 
