@@ -14,7 +14,7 @@ class Config:
     
     dropout_rate = 0.2
     channels = 100
-    kernel_size = 1
+    kernel_size = 3 #1,3,5...
     init_emb_size = 200
     gc1_emb_size = 100
 
