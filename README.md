@@ -36,10 +36,6 @@ For SACN model, you can run it using:
 ```
 CUDA_VISIBLE_DEVICES=0 python main.py model SACN dataset FB15k-237 process True
 ```
-OR
-```
-CUDA_VISIBLE_DEVICES=0 python main.py model SACN init_emb_size 200 gc1_emb_size 100 dropout_rate 0.2 channels 100 lr 0.002 kernel_size 5 dataset FB15k-237 process True
-```
 
 You can modify the hyper-parameters from "src.spodernet.spodernet.utils.global_config.py" or specify the hyper-parameter in the command. For different datasets, you need to tune the hyper-parameters. 
 
