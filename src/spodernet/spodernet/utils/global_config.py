@@ -12,17 +12,16 @@ class Backends:
 
 class Config:
     
-    dropout_rate = 0.2
+    dropout_rate = 0.2 #0.1, 0,2, 0.3
     channels = 100
-    kernel_size = 3 #1,3,5...
-    init_emb_size = 200
-    gc1_emb_size = 100
-
+    kernel_size = 5 #1,3,5...
+    init_emb_size = 100 #200
+    gc1_emb_size = 150 #100
     embedding_dim = 200
-    learning_rate = 0.001
+    learning_rate = 0.002 #0.001
+    batch_size = 128
 
     dropout = 0.2
-    batch_size = 128
     backend = Backends.TORCH
     L2 = 0.000
     cuda = False
