@@ -137,7 +137,7 @@ def main():
             for k in range(str2var['e2_multi1'][j].shape[0]):
                 if str2var['e2_multi1'][j][k] != 0:
                     a = str2var['rel'][j].cpu()
-                    data.append(str2var['rel'][j]).cpu()
+                    data.append(str2var['rel'][j].cpu())
                     rows.append(str2var['e1'][j].cpu().tolist()[0])
                     columns.append(str2var['e2_multi1'][j][k].cpu())
                 else:
