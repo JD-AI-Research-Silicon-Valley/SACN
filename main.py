@@ -132,7 +132,7 @@ def main():
     columns = []
 
     for i, str2var in enumerate(train_batcher):
-        print("batch number:", i)
+        if i % 10 == 0: print("batch number:", i)
         for j in range(str2var['e1'].shape[0]):
             for k in range(str2var['e2_multi1'][j].shape[0]):
                 if str2var['e2_multi1'][j][k] != 0:
@@ -206,8 +206,8 @@ def main():
         print(np.array(total_param_size).sum())
         model.load_state_dict(model_params)
         model.eval()
-        ranking_and_hits(model, test_rank_batcher, vocab, 'test_evaluation')
-        ranking_and_hits(model, dev_rank_batcher, vocab, 'dev_evaluation')
+        ranking_and_hits(model, test_rank_batcher, vocab, 'test_evaluation',X, adjacencies)
+        ranking_and_hits(model, dev_rank_batcher, vocab, 'dev_evaluation',X, adjacencies)
     else:
         model.init()
 
